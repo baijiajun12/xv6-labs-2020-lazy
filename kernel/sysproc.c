@@ -56,7 +56,7 @@ sys_sbrk(void)
   //惰性分配
   int addr;
   int n;
-  if(argint(&addr, &n) < 0)
+  if(argint(0 , &n) < 0)
     return -1;
   addr = myproc()->sz;
   struct proc *p;
