@@ -3,10 +3,10 @@
 #include "memlayout.h"
 #include "elf.h"
 #include "riscv.h"
+#include "spinlock.h"
 #include "defs.h"
 #include "fs.h"
 #include "proc.h"
-#include "spinlock.h"
 
 /*
  * the kernel's page table.
@@ -456,7 +456,7 @@ kama_uvmshouldallocate(uint64 va)
 {
   struct proc *p = myproc();
   pte_t *pte;
-  return PGROUNDDOWN(va) != r_sp() && (va < p->sz) && (((pte = walk(p, va, 0)) == 0) || ((*pte & PTE_V) ==0));
+  return (PGROUNDDOWN(va) !=PGROUNDDOWN(r_sp())) && (va < p->sz) && (((pte = walk(p->pagetable, va, 0)) == 0) || ((*pte & PTE_V) ==0));
 }
 
 void
@@ -470,7 +470,7 @@ kama_uvmlazyallocate(uint64 va)
     printf("lazy alloc: out of memory\n");
     p->killed = 1;
   }
-  if (mappages(p->pagetable,PGROUNDDOWN(va),PGSIZE,(uint64)pa,PTE_R||PTE_V||PTE_x||PTE_W) != 0)
+  if (mappages(p->pagetable,PGROUNDDOWN(va),PGSIZE,(uint64)pa,PTE_R|PTE_W|PTE_X|PTE_U) != 0)
   {
     printf("lazy alloc: failed to map page\n");
     kfree(pa);

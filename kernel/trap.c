@@ -85,7 +85,7 @@ usertrap(void)
   // }
   else {
     uint64 va = r_stval();
-    if ( (13 == r_scause() || 15 == r_scause()) && kama_uvmshouldallocate(va) )
+    if ( (r_scause()==13 || r_scause() == 15) && kama_uvmshouldallocate(va) )
     {
       kama_uvmlazyallocate(va);
     }
